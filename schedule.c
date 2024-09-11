@@ -25,6 +25,22 @@ void calculate_time_diff(int current_hour, int current_min, int current_sec, int
     printf("%02d:%02d:%02d %s\n", hours, minutes, seconds, activity_name);
 }
 
+int in_future(int current_hour, int current_min, int current_sec,
+              int activity_hour, int activity_min, int activity_sec) {
+    if (current_hour < activity_hour) {
+        return 1;
+    }
+    if (current_hour == activity_hour) {
+        if (current_min < activity_min) {
+            return 1;
+        }
+        if (current_min == activity_min && current_sec <= activity_sec) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int main() {
     FILE *file;
     char path[1000];
@@ -55,9 +71,12 @@ int main() {
         }
 
         if (day_counter == current_day) {
-	    sscanf(line, "%d:%d:%d:%99[^\n]", &activity_hour, &activity_min, &activity_sec, activity_name);
-            if (current_hour < activity_hour || (current_hour == activity_hour && current_min < activity_min) || (current_hour == activity_hour && current_min == activity_min && current_sec <= activity_sec)) {
-                calculate_time_diff(current_hour, current_min, current_sec, activity_hour, activity_min, activity_sec, activity_name);
+            sscanf(line, "%d:%d:%d:%99[^\n]", &activity_hour, &activity_min, &activity_sec, activity_name);
+            
+            if (in_future(current_hour, current_min, current_sec, 
+                          activity_hour, activity_min, activity_sec)) {
+                calculate_time_diff(current_hour, current_min, current_sec, 
+                                    activity_hour, activity_min, activity_sec, activity_name);
                 break;
             }
         }
